@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=bs_streamer
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=djangopass
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://django_user:djangopass@db:5432/bs_streamer
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
