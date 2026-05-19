@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}404 — Not Found | BitFlow{% endblock %}
+
+{% block content %}
+<section class="error-page">
+    <h1 class="error-page__code">404</h1>
+    <p class="error-page__msg">This page doesn't exist. Maybe the video was removed.</p>
+    <a href="{% url 'streaming:home' %}" class="error-page__link">← Back to Home</a>
+</section>
+{% endblock %}

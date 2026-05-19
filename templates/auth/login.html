@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Login — BitFlow{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-card__title">Welcome back</h1>
+        <p class="auth-card__sub">Log in to your BitFlow account</p>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="auth-alert">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'streaming:login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}" class="auth-form" id="login-form">
+            {% csrf_token %}
+            <div class="auth-form__group">
+                <label class="auth-form__label" for="id_username">Username</label>
+                <input class="auth-form__input" type="text" name="username" id="id_username" placeholder="your_username" required autofocus>
+            </div>
+            <div class="auth-form__group">
+                <label class="auth-form__label" for="id_password">Password</label>
+                <input class="auth-form__input" type="password" name="password" id="id_password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="auth-form__submit" id="login-submit">Log In</button>
+        </form>
+
+        <p class="auth-card__switch">
+            Don't have an account? <a href="{% url 'streaming:register' %}">Register</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

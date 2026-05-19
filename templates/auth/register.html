@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Register — BitFlow{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <h1 class="auth-card__title">Create account</h1>
+        <p class="auth-card__sub">Join BitFlow today — it's free</p>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="auth-alert">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" action="{% url 'streaming:register' %}" class="auth-form" id="register-form">
+            {% csrf_token %}
+            <div class="auth-form__group">
+                <label class="auth-form__label" for="id_username">Username</label>
+                <input class="auth-form__input" type="text" name="username" id="id_username" placeholder="choose_a_username" required autofocus>
+            </div>
+            <div class="auth-form__group">
+                <label class="auth-form__label" for="id_email">Email <span class="auth-form__optional">(optional)</span></label>
+                <input class="auth-form__input" type="email" name="email" id="id_email" placeholder="you@example.com">
+            </div>
+            <div class="auth-form__group">
+                <label class="auth-form__label" for="id_password">Password</label>
+                <input class="auth-form__input" type="password" name="password" id="id_password" placeholder="••••••••" required>
+            </div>
+            <div class="auth-form__group">
+                <label class="auth-form__label" for="id_password2">Confirm password</label>
+                <input class="auth-form__input" type="password" name="password2" id="id_password2" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="auth-form__submit" id="register-submit">Create Account</button>
+        </form>
+
+        <p class="auth-card__switch">
+            Already have an account? <a href="{% url 'streaming:login' %}">Log in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

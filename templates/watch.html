@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ video.title }} — BitFlow{% endblock %}
+
+{% block content %}
+<div class="player-layout">
+    <!-- ─── Main Player ─── -->
+    <div class="player-main">
+        <div class="player-wrapper">
+            <video
+                id="video-player"
+                class="player-video"
+                controls
+                autoplay
+                preload="metadata"
+                src="{% url 'streaming:stream' video.pk %}"
+            >
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <div class="player-details">
+            <h1 class="player-details__title">{{ video.title }}</h1>
+            <div class="player-details__meta">
+                {% if video.category %}
+                    <span class="player-details__category">{{ video.category.name }}</span>
+                {% endif %}
+                <span class="player-details__views">{{ video.views_count }} view{{ video.views_count|pluralize }}</span>
+                <span class="player-details__date">{{ video.created_at|date:"M d, Y" }}</span>
+            </div>
+            {% if video.description %}
+                <p class="player-details__desc">{{ video.description }}</p>
+            {% endif %}
+
+            <!-- ─── Like / Dislike ─── -->
+            <div class="reactions" id="reactions">
+                {% if user.is_authenticated %}
+                <button
+                    class="reaction-btn {% if user_liked %}reaction-btn--active{% endif %}"
+                    id="like-btn"
+                    data-url="{% url 'streaming:like' video.pk %}"
+                >
+                    👍 <span id="like-count">{{ video.like_count }}</span>
+                </button>
+                <button
+                    class="reaction-btn {% if user_disliked %}reaction-btn--active reaction-btn--dislike{% endif %}"
+                    id="dislike-btn"
+                    data-url="{% url 'streaming:dislike' video.pk %}"
+                >
+                    👎 <span id="dislike-count">{{ video.dislike_count }}</span>
+                </button>
+                {% else %}
+                <a href="{% url 'streaming:login' %}?next={{ request.path }}" class="reaction-btn">
+                    👍 {{ video.like_count }}
+                </a>
+                <a href="{% url 'streaming:login' %}?next={{ request.path }}" class="reaction-btn">
+                    👎 {{ video.dislike_count }}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ─── Comments ─── -->
+        <section class="comments" id="comments">
+            <h2 class="comments__title">{{ comments|length }} Comment{{ comments|length|pluralize }}</h2>
+
+            {% if user.is_authenticated %}
+            <form class="comment-form" method="post" action="{% url 'streaming:add_comment' video.pk %}">
+                {% csrf_token %}
+                <textarea
+                    class="comment-form__input"
+                    name="body"
+                    placeholder="Add a comment..."
+                    rows="2"
+                    maxlength="1000"
+                    required
+                    id="comment-input"
+                ></textarea>
+                <button type="submit" class="comment-form__submit" id="comment-submit">Post</button>
+            </form>
+            {% else %}
+            <p class="comments__login-prompt">
+                <a href="{% url 'streaming:login' %}?next={{ request.path }}">Log in</a> to leave a comment.
+            </p>
+            {% endif %}
+
+            <div class="comment-list">
+                {% for comment in comments %}
+                <div class="comment" id="comment-{{ comment.pk }}">
+                    <div class="comment__header">
+                        <span class="comment__author">{{ comment.user.username }}</span>
+                        <span class="comment__date">{{ comment.created_at|date:"M d, Y" }}</span>
+                        {% if user == comment.user %}
+                        <form method="post" action="{% url 'streaming:delete_comment' comment.pk %}" class="comment__delete-form">
+                            {% csrf_token %}
+                            <button type="submit" class="comment__delete" title="Delete comment">✕</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <p class="comment__body">{{ comment.body }}</p>
+                </div>
+                {% empty %}
+                <p class="comments__empty">No comments yet. Be the first!</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+
+    <!-- ─── Related Videos Sidebar ─── -->
+    <aside class="player-sidebar">
+        <h2 class="player-sidebar__title">Up Next</h2>
+        {% for rv in related %}
+        <a href="{% url 'streaming:watch' rv.pk %}" class="sidebar-card" id="related-{{ rv.pk }}">
+            <div class="sidebar-card__thumb">
+                {% if rv.thumbnail %}
+                    <img src="{{ rv.thumbnail.url }}" alt="{{ rv.title }}" loading="lazy">
+                {% else %}
+                    <div class="sidebar-card__placeholder">▶</div>
+                {% endif %}
+                {% if rv.duration_display %}
+                    <span class="sidebar-card__duration">{{ rv.duration_display }}</span>
+                {% endif %}
+            </div>
+            <div class="sidebar-card__info">
+                <h4 class="sidebar-card__title">{{ rv.title }}</h4>
+                {% if rv.category %}
+                    <span class="sidebar-card__category">{{ rv.category.name }}</span>
+                {% endif %}
+            </div>
+        </a>
+        {% empty %}
+        <p class="sidebar-empty">No other videos yet.</p>
+        {% endfor %}
+    </aside>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ─── Like / Dislike AJAX ───
+function setupReaction(btnId, countId, otherBtnId, otherCountId) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+        const resp = await fetch(btn.dataset.url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!resp.ok) return;
+        const data = await resp.json();
+
+        document.getElementById('like-count').textContent = data.like_count;
+        document.getElementById('dislike-count').textContent = data.dislike_count;
+
+        // Toggle active states
+        const likeBtn = document.getElementById('like-btn');
+        const dislikeBtn = document.getElementById('dislike-btn');
+        likeBtn.classList.toggle('reaction-btn--active', data.liked === true || (!data.hasOwnProperty('liked') && data.like_count > 0 && btnId === 'like-btn'));
+        dislikeBtn.classList.toggle('reaction-btn--active', data.disliked === true);
+        dislikeBtn.classList.toggle('reaction-btn--dislike', data.disliked === true);
+    });
+}
+
+setupReaction('like-btn', 'like-count', 'dislike-btn', 'dislike-count');
+setupReaction('dislike-btn', 'dislike-count', 'like-btn', 'like-count');
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}BitFlow — Browse{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero__content">
+        <h1 class="hero__title">Welcome to <span class="gradient-text">BitFlow</span></h1>
+        <p class="hero__subtitle">Stream your favorite videos, anytime.</p>
+    </div>
+</section>
+
+<!-- ─── Search Results Banner ─── -->
+{% if search_query %}
+<section class="search-banner">
+    <p>Results for "<strong>{{ search_query }}</strong>" — {{ videos|length }} found</p>
+    <a href="{% url 'streaming:home' %}" class="search-banner__clear">✕ Clear</a>
+</section>
+{% endif %}
+
+<!-- ─── Category Filter ─── -->
+{% if categories and not search_query %}
+<section class="categories">
+    <a href="{% url 'streaming:home' %}"
+       class="category-chip {% if not selected_category %}category-chip--active{% endif %}">
+        All
+    </a>
+    {% for cat in categories %}
+    <a href="{% url 'streaming:home' %}?category={{ cat.name }}"
+       class="category-chip {% if selected_category == cat.name %}category-chip--active{% endif %}">
+        {{ cat.name }}
+    </a>
+    {% endfor %}
+</section>
+{% endif %}
+
+<!-- ─── Video Grid ─── -->
+<section class="video-grid">
+    {% for video in videos %}
+    <a href="{% url 'streaming:watch' video.pk %}" class="video-card" id="video-{{ video.pk }}">
+        <div class="video-card__thumb">
+            {% if video.thumbnail %}
+                <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}" loading="lazy">
+            {% else %}
+                <div class="video-card__placeholder">▶</div>
+            {% endif %}
+            {% if video.duration_display %}
+                <span class="video-card__duration">{{ video.duration_display }}</span>
+            {% endif %}
+        </div>
+        <div class="video-card__info">
+            <h3 class="video-card__title">{{ video.title }}</h3>
+            <div class="video-card__meta">
+                {% if video.category %}
+                    <span class="video-card__category">{{ video.category.name }}</span>
+                {% endif %}
+                <span class="video-card__views">{{ video.views_count }} view{{ video.views_count|pluralize }}</span>
+            </div>
+        </div>
+    </a>
+    {% empty %}
+    <div class="empty-state">
+        {% if search_query %}
+            <p>No videos match your search. <a href="{% url 'streaming:home' %}">Browse all</a>.</p>
+        {% else %}
+            <p>No videos yet. Upload some through the <a href="/admin/">admin panel</a>.</p>
+        {% endif %}
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}
