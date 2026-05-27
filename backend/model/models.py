@@ -57,6 +57,13 @@ class Video(models.Model):
     thumbnail = models.ImageField(upload_to='thumbnails/', blank=True, null=True)
     duration = models.DurationField(blank=True, null=True, help_text='Auto-filled on upload')
     views_count = models.PositiveIntegerField(default=0)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='uploaded_videos',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

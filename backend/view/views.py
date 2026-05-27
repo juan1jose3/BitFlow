@@ -72,6 +72,7 @@ def upload_video(request):
         description=description,
         category=category,
         video_file=video_file,
+        uploaded_by=request.user,
     )
 
     if thumbnail_file:

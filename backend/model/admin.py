@@ -15,10 +15,10 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Video)
 class VideoAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'duration', 'views_count', 'thumb_preview', 'file_size', 'created_at')
+    list_display = ('title', 'uploaded_by', 'category', 'duration', 'views_count', 'thumb_preview', 'file_size', 'created_at')
     list_filter = ('category', 'created_at')
     search_fields = ('title', 'description')
-    readonly_fields = ('views_count', 'duration', 'thumb_preview_large', 'created_at', 'updated_at')
+    readonly_fields = ('uploaded_by', 'views_count', 'duration', 'thumb_preview_large', 'created_at', 'updated_at')
 
     @admin.display(description='Thumbnail')
     def thumb_preview(self, obj):

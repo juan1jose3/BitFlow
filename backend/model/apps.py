@@ -6,3 +6,6 @@ class ModelConfig(AppConfig):
     name = 'backend.model'
     label = 'streaming'
     verbose_name = 'Streaming Models'
+
+    def ready(self):
+        import backend.model.analytics_models  # noqa: F401 — registers models

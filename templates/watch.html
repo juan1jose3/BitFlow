@@ -21,6 +21,9 @@
 
         <div class="player-details">
             <h1 class="player-details__title">{{ video.title }}</h1>
+            {% if video.uploaded_by %}
+            <p class="player-details__uploader">📤 Uploaded by <strong>{{ video.uploaded_by.username }}</strong></p>
+            {% endif %}
             <div class="player-details__meta">
                 {% if video.category %}
                     <span class="player-details__category">{{ video.category.name }}</span>

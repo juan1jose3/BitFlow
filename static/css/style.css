@@ -349,7 +349,19 @@ img, video {
     font-size: .85rem;
 }
 
+.player-details__uploader {
+    font-size: .88rem;
+    color: var(--text-muted);
+    margin-bottom: .5rem;
+}
+
+.player-details__uploader strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
 .player-details__desc {
+
     color: var(--text-muted);
     line-height: 1.7;
 }

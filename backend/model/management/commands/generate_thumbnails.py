@@ -1,10 +1,4 @@
-"""
-Management command to generate missing thumbnails for all videos.
 
-Usage:
-    python manage.py generate_thumbnails           # all videos without thumbnail
-    python manage.py generate_thumbnails --all     # regenerate even existing thumbnails
-"""
 from django.core.management.base import BaseCommand
 from backend.model.models import Video
 
